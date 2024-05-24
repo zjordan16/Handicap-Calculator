@@ -52,12 +52,12 @@ class HandicapCalculator(toga.App):
         if inputs_are_valid:
             # Get Inputs
             course_name = self.course_name_input.children[1].value
-            score = self.score_input.children[1].value
+            adjusted_gross_score = self.score_input.children[1].value
             slope = self.course_slope_input.children[1].value
             rating = self.course_rating_input.children[1].value
-            index = self.calculate_round_index(score, slope, rating)
+            differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
 
-            self.score_history_table.data.append((course_name, score, slope, rating, index))
+            self.score_history_table.data.append((course_name, adjusted_gross_score, slope, rating, differential))
 
             # Refresh handicap
             self.refresh_handicap_index()
@@ -85,7 +85,7 @@ class HandicapCalculator(toga.App):
 
     def create_score_input(self) -> toga.Box:
         score_name_label = toga.Label(
-            "Net Score: ",
+            "Adjusted Gross Score: ",
             style=Pack(padding=(0, 5)),
         )
         score_input = toga.NumberInput(min=1, step=1)
@@ -121,7 +121,7 @@ class HandicapCalculator(toga.App):
 
     def create_score_history_table(self) -> toga.Table:
         return toga.Table(
-            headings=["Course Name", "Net Score", "Course Rating", "Course Slope Rating", "Round Handicap Index"],
+            headings=["Course Name", "Adjusted Gross Score", "Course Rating", "Course Slope Rating", "Round Differential"],
             style=Pack(flex=5)
         )
 
@@ -142,13 +142,12 @@ class HandicapCalculator(toga.App):
 
         return handicap_box
 
-    def calculate_round_index(self, score: int, slope: int, rating: float) -> float:
-        # TODO: implement round handicap index calculation logic
-        return 10.0
+    def calculate_round_differential(self, adjusted_gross_score: int, slope: int, rating: float) -> float:
+        return round((adjusted_gross_score - rating) * 113 / slope, 1)
 
     def calculate_handicap_index(self) -> float:
         # TODO: implement overall handicap index calculation logic
-        self.handicap_index = "TBD"
+        self.handicap_index = "N/A"
 
     def refresh_handicap_index(self) -> None:
         self.calculate_handicap_index()
