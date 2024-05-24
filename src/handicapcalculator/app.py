@@ -35,9 +35,11 @@ class HandicapCalculator(toga.App):
 
         # Create table to show saved rounds
         self.score_history_table = self.create_score_history_table()
-
-        # Add table to main box
         main_box.add(self.score_history_table)
+
+        # Create display for handicap
+        self.handicap_display = self.create_handicap_display()
+        main_box.add(self.handicap_display)
 
         self.main_window = toga.MainWindow(title="Handicap Calculator")
         self.main_window.content = main_box
@@ -48,15 +50,17 @@ class HandicapCalculator(toga.App):
             self.course_name_input.children[1].value and self.score_input.children[1].value and self.course_slope_input.children[1].value and self.course_rating_input.children[1].value
         )
         if inputs_are_valid:
-            # Add inputs to table
-            self.score_history_table.data.append(
-                (
-                    self.course_name_input.children[1].value,
-                    self.score_input.children[1].value,
-                    self.course_slope_input.children[1].value,
-                    self.course_rating_input.children[1].value,
-                )
-            )
+            # Get Inputs
+            course_name = self.course_name_input.children[1].value
+            score = self.score_input.children[1].value
+            slope = self.course_slope_input.children[1].value
+            rating = self.course_rating_input.children[1].value
+            index = self.calculate_round_index(score, slope, rating)
+
+            self.score_history_table.data.append((course_name, score, slope, rating, index))
+
+            # Refresh handicap
+            self.refresh_handicap_index()
 
             # Clear inputs
             self.invalid_inputs_message.style.visibility = "hidden"
@@ -73,7 +77,7 @@ class HandicapCalculator(toga.App):
             style=Pack(padding=(0, 5)),
         )
         course_name_text_input = toga.TextInput(style=Pack(flex=1))
-        course_name_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        course_name_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
         course_name_box.add(course_name_label)
         course_name_box.add(course_name_text_input)
 
@@ -85,7 +89,7 @@ class HandicapCalculator(toga.App):
             style=Pack(padding=(0, 5)),
         )
         score_input = toga.NumberInput(min=1, step=1)
-        score_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        score_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
         score_box.add(score_name_label)
         score_box.add(score_input)
 
@@ -97,7 +101,7 @@ class HandicapCalculator(toga.App):
             style=Pack(padding=(0, 5)),
         )
         slope_input = toga.NumberInput(min=55, max=155, step=1)
-        slope_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        slope_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
         slope_box.add(slope_label)
         slope_box.add(slope_input)
 
@@ -109,20 +113,46 @@ class HandicapCalculator(toga.App):
             style=Pack(padding=(0, 5)),
         )
         course_rating_input = toga.NumberInput(min=55, max=85, step=0.1)
-        course_rating_box = toga.Box(style=Pack(direction=ROW, padding=5))
+        course_rating_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
         course_rating_box.add(course_rating_label)
         course_rating_box.add(course_rating_input)
 
         return course_rating_box
 
     def create_score_history_table(self) -> toga.Table:
-        return toga.Table(headings=["Course Name", "Net Score", "Course Rating", "Course Slope Rating"])
+        return toga.Table(
+            headings=["Course Name", "Net Score", "Course Rating", "Course Slope Rating", "Round Handicap Index"],
+            style=Pack(flex=5)
+        )
 
     def create_invalid_inputs_message(self) -> toga.Label:
         return toga.Label(
             "Please provide a value for all four inputs!",
-            style=Pack(padding=(0, 5), color="red", visibility="hidden")
+            style=Pack(padding=(0, 5), color="red", visibility="hidden", flex=1),
         )
+
+    def create_handicap_display(self) -> toga.Box:
+        self.calculate_handicap_index()
+        handicap_label = toga.Label(
+            f"Handicap Index: {self.handicap_index}",
+            style=Pack(flex=1, color="blue", text_align="center"),
+        )
+        handicap_box = toga.Box(style=Pack(flex=2, alignment="center"))
+        handicap_box.add(handicap_label)
+
+        return handicap_box
+
+    def calculate_round_index(self, score: int, slope: int, rating: float) -> float:
+        # TODO: implement round handicap index calculation logic
+        return 10.0
+
+    def calculate_handicap_index(self) -> float:
+        # TODO: implement overall handicap index calculation logic
+        self.handicap_index = "TBD"
+
+    def refresh_handicap_index(self) -> None:
+        self.calculate_handicap_index()
+        self.handicap_display.children[0].text = f"Handicap Index: {self.handicap_index}"
 
 def main():
     return HandicapCalculator()
