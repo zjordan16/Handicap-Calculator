@@ -28,8 +28,8 @@ class HandicapCalculator(toga.App):
         # Add inputs to main box
         main_box.add(self.course_name_input)
         main_box.add(self.score_input)
-        main_box.add(self.course_slope_input)
         main_box.add(self.course_rating_input)
+        main_box.add(self.course_slope_input)
         main_box.add(self.invalid_inputs_message)
         main_box.add(save_round_button)
 
@@ -143,7 +143,7 @@ class HandicapCalculator(toga.App):
         return handicap_box
 
     def calculate_round_differential(self, adjusted_gross_score: int, slope: int, rating: float) -> float:
-        return round((adjusted_gross_score - rating) * 113 / slope, 1)
+        return round(((113 / slope) * (adjusted_gross_score - rating)), 1)
 
     def calculate_handicap_index(self) -> float:
         # TODO: implement overall handicap index calculation logic
