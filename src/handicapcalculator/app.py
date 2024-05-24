@@ -16,6 +16,7 @@ class HandicapCalculator(toga.App):
         self.score_input = self.create_score_input()
         self.course_slope_input = self.create_slope_input()
         self.course_rating_input = self.create_course_rating_input()
+        self.invalid_inputs_message = self.create_invalid_inputs_message()
 
         # Create button to save inputs
         save_round_button = toga.Button(
@@ -29,6 +30,7 @@ class HandicapCalculator(toga.App):
         main_box.add(self.score_input)
         main_box.add(self.course_slope_input)
         main_box.add(self.course_rating_input)
+        main_box.add(self.invalid_inputs_message)
         main_box.add(save_round_button)
 
         # Create table to show saved rounds
@@ -42,22 +44,28 @@ class HandicapCalculator(toga.App):
         self.main_window.show()
 
     def save_score(self, widget):
-        # TODO: Validate that all the inputs have a value. Show an error to user and mark them as required if not.
-        # Add inputs to table
-        self.score_history_table.data.append(
-            (
-                self.course_name_input.children[1].value,
-                self.score_input.children[1].value,
-                self.course_slope_input.children[1].value,
-                self.course_rating_input.children[1].value,
-            )
+        inputs_are_valid = (
+            self.course_name_input.children[1].value and self.score_input.children[1].value and self.course_slope_input.children[1].value and self.course_rating_input.children[1].value
         )
+        if inputs_are_valid:
+            # Add inputs to table
+            self.score_history_table.data.append(
+                (
+                    self.course_name_input.children[1].value,
+                    self.score_input.children[1].value,
+                    self.course_slope_input.children[1].value,
+                    self.course_rating_input.children[1].value,
+                )
+            )
 
-        # Clear inputs
-        self.course_name_input.children[1].value = None
-        self.score_input.children[1].value = None
-        self.course_slope_input.children[1].value = None
-        self.course_rating_input.children[1].value = None
+            # Clear inputs
+            self.invalid_inputs_message.style.visibility = "hidden"
+            self.course_name_input.children[1].value = None
+            self.score_input.children[1].value = None
+            self.course_slope_input.children[1].value = None
+            self.course_rating_input.children[1].value = None
+        else:
+            self.invalid_inputs_message.style.visibility = "visible"
 
     def create_course_name_input(self) -> toga.Box:
         course_name_label = toga.Label(
@@ -76,7 +84,7 @@ class HandicapCalculator(toga.App):
             "Net Score: ",
             style=Pack(padding=(0, 5)),
         )
-        score_input = toga.NumberInput(min_value=1, step=1)
+        score_input = toga.NumberInput(min=1, step=1)
         score_box = toga.Box(style=Pack(direction=ROW, padding=5))
         score_box.add(score_name_label)
         score_box.add(score_input)
@@ -88,7 +96,7 @@ class HandicapCalculator(toga.App):
             "Course Slope Rating: ",
             style=Pack(padding=(0, 5)),
         )
-        slope_input = toga.NumberInput(min_value=55, max_value=155, step=1)
+        slope_input = toga.NumberInput(min=55, max=155, step=1)
         slope_box = toga.Box(style=Pack(direction=ROW, padding=5))
         slope_box.add(slope_label)
         slope_box.add(slope_input)
@@ -100,7 +108,7 @@ class HandicapCalculator(toga.App):
             "Course Rating: ",
             style=Pack(padding=(0, 5)),
         )
-        course_rating_input = toga.NumberInput(min_value=55, max_value=85, step=0.1)
+        course_rating_input = toga.NumberInput(min=55, max=85, step=0.1)
         course_rating_box = toga.Box(style=Pack(direction=ROW, padding=5))
         course_rating_box.add(course_rating_label)
         course_rating_box.add(course_rating_input)
@@ -109,6 +117,12 @@ class HandicapCalculator(toga.App):
 
     def create_score_history_table(self) -> toga.Table:
         return toga.Table(headings=["Course Name", "Net Score", "Course Rating", "Course Slope Rating"])
+
+    def create_invalid_inputs_message(self) -> toga.Label:
+        return toga.Label(
+            "Please provide a value for all four inputs!",
+            style=Pack(padding=(0, 5), color="red", visibility="hidden")
+        )
 
 def main():
     return HandicapCalculator()
