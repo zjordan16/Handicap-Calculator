@@ -147,8 +147,14 @@ class HandicapCalculator(toga.App):
 
     def calculate_handicap_index(self) -> float:
         # TODO: implement overall handicap index calculation logic
-        self.handicap_index = "N/A"
-
+        # In Progress
+        calc_handicap_index = -100            # -100 used to flag invalid calculation of handicap index
+        
+        if handicap_index == -100:
+            self.handicap_index = "N/A"
+        else:
+            self.handicap_index = calc_handicap_index
+            
     def refresh_handicap_index(self) -> None:
         self.calculate_handicap_index()
         self.handicap_display.children[0].text = f"Handicap Index: {self.handicap_index}"
