@@ -5,6 +5,8 @@ This is a mobile/desktop application that can calculate an unofficial USGA handi
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
+import os
+import polars as pl
 
 
 class HandicapCalculator(toga.App):
@@ -57,10 +59,24 @@ class HandicapCalculator(toga.App):
             rating = self.course_rating_input.children[1].value
             differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
 
-            self.score_history_table.data.append((course_name, adjusted_gross_score, slope, rating, differential))
+            # declare new_data as a tuple
+            new_data = (course_name, adjusted_gross_score, slope, rating, differential)
 
-            # Refresh handicap
+            # Check if CSV exists, append if exists, create new if it doesn't
+            csv_file = 'score_history_table.csv'
+            if os.path.exists(csv_file):
+                existing_df = pl.read_csv(csv_file)
+                new_df = pl.DataFrame([new_data], schema=["course_name", "adjusted_gross_score", "slope", "rating","differential"])
+                df = pl.concat([existing_df, new_df])
+            else:
+                df = pl.DataFrame([new_data], schema=["course_name", "adjusted_gross_score", "slope", "rating","differential"]).write_csv(csv_file)
+
+            # Write new tuple to list in csv
+            df.write_csv(csv_file)
+
+            # Refresh handicap and table
             self.refresh_handicap_index()
+            self.display_table()
 
             # Clear inputs
             self.invalid_inputs_message.style.visibility = "hidden"
@@ -70,6 +86,15 @@ class HandicapCalculator(toga.App):
             self.course_rating_input.children[1].value = None
         else:
             self.invalid_inputs_message.style.visibility = "visible"
+            
+    def display_table(self):
+        csv_file = 'score_history_table.csv'
+        if os.path.exists(csv_file):
+            df = pl.read_csv(csv_file)
+        self.score_history_table.data.clear()
+        for row in df.rows(named=True):
+            self.score_history_table.data.append((row["course_name"], row["adjusted_gross_score"], 
+                                                 row["slope"], row["rating"], row["differential"]))
 
     def create_course_name_input(self) -> toga.Box:
         course_name_label = toga.Label(
@@ -150,7 +175,7 @@ class HandicapCalculator(toga.App):
         # In Progress
         calc_handicap_index = -100            # -100 used to flag invalid calculation of handicap index
         
-        if handicap_index == -100:
+        if calc_handicap_index == -100:
             self.handicap_index = "N/A"
         else:
             self.handicap_index = calc_handicap_index
