@@ -47,6 +47,9 @@ class HandicapCalculator(toga.App):
 		self.main_window.content = main_box
 		self.main_window.show()
 
+		# Display table on startup
+		self.display_table()
+
 	def save_score(self, widget):
 		inputs_are_valid = (
 				self.course_name_input.children[1].value and self.score_input.children[1].value and
@@ -98,13 +101,29 @@ class HandicapCalculator(toga.App):
 			self.invalid_inputs_message.style.visibility = "visible"
 
 	def display_table(self):
-		csv_file = 'score_history_table.csv'
-		if os.path.exists(csv_file):
-			df = pl.read_csv(csv_file)
 		self.score_history_table.data.clear()
-		for row in df.rows(named=True):
-			self.score_history_table.data.append((row["course_name"], row["adjusted_gross_score"],
-												  row["slope"], row["rating"], row["differential"]))
+
+		# declare csv name and directory
+		file_name = 'score_history_table.csv'
+		file_directory = r"C:\Users\byork\Documents\Handicap Calculator\venv\Scripts\handicapcalculator\src\handicapcalculator"
+		csv_file = os.path.join(file_directory, file_name)
+
+		if os.path.exists(csv_file):
+			# read csv as polars dataframe and save newest 20 rounds to new dataframe (newest_20)
+			df = pl.read_csv(csv_file)
+			newest_20 = df.tail(20)
+
+			# loop displays newest 20 games to table from newest to oldest
+			for row in reversed(list(newest_20.iter_rows(named=True))):
+				self.score_history_table.data.append([str(row[newest_20.columns[0]]),
+													  str(row[newest_20.columns[1]]),
+													  str(row[newest_20.columns[2]]),
+													  str(row[newest_20.columns[3]]),
+													  str(row[newest_20.columns[4]]),
+													  ])
+		else:
+			# display blank table
+			self.score_history_table.data.clear()
 
 	def create_course_name_input(self) -> toga.Box:
 		course_name_label = toga.Label(
