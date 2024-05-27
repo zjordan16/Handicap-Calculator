@@ -5,6 +5,7 @@ This is a mobile/desktop application that can calculate an unofficial USGA handi
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
+from icecream import ic
 import os
 import polars as pl
 
@@ -68,13 +69,16 @@ class HandicapCalculator(toga.App):
 						"rating": float(rating), "differential": float(differential)}
 
 			# Create output directory for csv
-			output_directory = r"C:\Users\byork\Documents\Handicap Calculator\venv\Scripts\handicapcalculator\src\handicapcalculator"
+			output_directory = os.path.dirname(__file__)
 			os.makedirs(output_directory, exist_ok=True)
 			csv_file = os.path.join(output_directory, "score_history_table.csv")
 
 			# Check if CSV exists, append if exists, create new if it doesn't
 			if os.path.exists(csv_file):
-				existing_df = pl.read_csv(csv_file)
+				# Scan reads dataframes in lazy mode
+				existing_df = pl.scan_csv(csv_file)
+				# .collect() converts dataframe to eager mode for concate/write operations
+				existing_df = existing_df.collect()
 				new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
 														"slope": pl.Int64, "rating": pl.Float64,
 														"differential": pl.Float64})
@@ -84,8 +88,9 @@ class HandicapCalculator(toga.App):
 														"slope": pl.Int64, "rating": pl.Float64,
 														"differential": pl.Float64})
 
-			# Write new tuple to list in csv
-			df.write_csv(csv_file)
+			# Write new data to list in csv
+			df_lazy = df.lazy()
+			df_lazy.sink_csv(csv_file)
 
 			# Refresh handicap and table
 			self.refresh_handicap_index()
@@ -105,12 +110,13 @@ class HandicapCalculator(toga.App):
 
 		# declare csv name and directory
 		file_name = 'score_history_table.csv'
-		file_directory = r"C:\Users\byork\Documents\Handicap Calculator\venv\Scripts\handicapcalculator\src\handicapcalculator"
+		file_directory = os.path.dirname(__file__)
 		csv_file = os.path.join(file_directory, file_name)
 
 		if os.path.exists(csv_file):
 			# read csv as polars dataframe and save newest 20 rounds to new dataframe (newest_20)
-			df = pl.read_csv(csv_file)
+			df = pl.scan_csv(csv_file)
+			df = df.collect()
 			newest_20 = df.tail(20)
 
 			# loop displays newest 20 games to table from newest to oldest
