@@ -65,7 +65,7 @@ class HandicapCalculator(toga.App):
 			rating = self.course_rating_input.children[1].value
 			differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
 
-   # Write inputs to CSV
+   			# Write inputs to CSV
 			self.write_to_csv(course_name, adjusted_gross_score, slope, rating, differential)
 			
 			# Refresh handicap and table
@@ -82,7 +82,7 @@ class HandicapCalculator(toga.App):
 			self.invalid_inputs_message.style.visibility = "visible"
 
 
- def write_to_csv(self, course_name: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
+	def write_to_csv(self, course_name: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
 		# declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
 		new_data = {"course_name": course_name, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
 		"rating": float(rating), "differential": float(differential)}
@@ -98,15 +98,11 @@ class HandicapCalculator(toga.App):
 			existing_df = pl.scan_csv(csv_file)
 			# .collect() converts dataframe to eager mode for concate/write operations
 			existing_df = existing_df.collect()
-			new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
-													"slope": pl.Int64, "rating": pl.Float64,
-													"differential": pl.Float64})
+			new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
 			df = pl.concat([existing_df, new_df])
 		else:
-			df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
-													"slope": pl.Int64, "rating": pl.Float64,
-													"differential": pl.Float64})
-
+			df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
+			
 		# Write new data to list in csv
 		df_lazy = df.lazy()
 		df_lazy.sink_csv(csv_file)
