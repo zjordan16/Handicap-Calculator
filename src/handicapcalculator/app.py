@@ -51,6 +51,7 @@ class HandicapCalculator(toga.App):
 		# Display table on startup
 		self.display_table()
 
+
 	def save_score(self, widget):
 		inputs_are_valid = (
 				self.course_name_input.children[1].value and self.score_input.children[1].value and
@@ -64,34 +65,9 @@ class HandicapCalculator(toga.App):
 			rating = self.course_rating_input.children[1].value
 			differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
 
-			# declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
-			new_data = {"course_name": course_name, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
-						"rating": float(rating), "differential": float(differential)}
-
-			# Create output directory for csv
-			output_directory = os.path.dirname(__file__)
-			os.makedirs(output_directory, exist_ok=True)
-			csv_file = os.path.join(output_directory, "score_history_table.csv")
-
-			# Check if CSV exists, append if exists, create new if it doesn't
-			if os.path.exists(csv_file):
-				# Scan reads dataframes in lazy mode
-				existing_df = pl.scan_csv(csv_file)
-				# .collect() converts dataframe to eager mode for concate/write operations
-				existing_df = existing_df.collect()
-				new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
-														"slope": pl.Int64, "rating": pl.Float64,
-														"differential": pl.Float64})
-				df = pl.concat([existing_df, new_df])
-			else:
-				df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
-														"slope": pl.Int64, "rating": pl.Float64,
-														"differential": pl.Float64})
-
-			# Write new data to list in csv
-			df_lazy = df.lazy()
-			df_lazy.sink_csv(csv_file)
-
+   # Write inputs to CSV
+			self.write_to_csv(course_name, adjusted_gross_score, slope, rating, differential)
+			
 			# Refresh handicap and table
 			self.refresh_handicap_index()
 			self.display_table()
@@ -104,6 +80,37 @@ class HandicapCalculator(toga.App):
 			self.course_rating_input.children[1].value = None
 		else:
 			self.invalid_inputs_message.style.visibility = "visible"
+
+
+ def write_to_csv(self, course_name: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
+		# declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
+		new_data = {"course_name": course_name, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
+		"rating": float(rating), "differential": float(differential)}
+
+		# Create output directory for csv
+		output_directory = os.path.dirname(__file__)
+		os.makedirs(output_directory, exist_ok=True)
+		csv_file = os.path.join(output_directory, "score_history_table.csv")
+
+		# Check if CSV exists, append if exists, create new if it doesn't
+		if os.path.exists(csv_file):
+			# Scan reads dataframes in lazy mode
+			existing_df = pl.scan_csv(csv_file)
+			# .collect() converts dataframe to eager mode for concate/write operations
+			existing_df = existing_df.collect()
+			new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
+													"slope": pl.Int64, "rating": pl.Float64,
+													"differential": pl.Float64})
+			df = pl.concat([existing_df, new_df])
+		else:
+			df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64,
+													"slope": pl.Int64, "rating": pl.Float64,
+													"differential": pl.Float64})
+
+		# Write new data to list in csv
+		df_lazy = df.lazy()
+		df_lazy.sink_csv(csv_file)
+
 
 	def display_table(self):
 		self.score_history_table.data.clear()
@@ -131,6 +138,7 @@ class HandicapCalculator(toga.App):
 			# display blank table
 			self.score_history_table.data.clear()
 
+
 	def create_course_name_input(self) -> toga.Box:
 		course_name_label = toga.Label(
 			"Course Name: ",
@@ -142,6 +150,7 @@ class HandicapCalculator(toga.App):
 		course_name_box.add(course_name_text_input)
 
 		return course_name_box
+
 
 	def create_score_input(self) -> toga.Box:
 		score_name_label = toga.Label(
@@ -155,6 +164,7 @@ class HandicapCalculator(toga.App):
 
 		return score_box
 
+
 	def create_slope_input(self) -> toga.Box:
 		slope_label = toga.Label(
 			"Course Slope Rating: ",
@@ -166,6 +176,7 @@ class HandicapCalculator(toga.App):
 		slope_box.add(slope_input)
 
 		return slope_box
+
 
 	def create_course_rating_input(self) -> toga.Box:
 		course_rating_label = toga.Label(
@@ -179,6 +190,7 @@ class HandicapCalculator(toga.App):
 
 		return course_rating_box
 
+
 	def create_score_history_table(self) -> toga.Table:
 		return toga.Table(
 			headings=["Course Name", "Adjusted Gross Score", "Course Rating", "Course Slope Rating",
@@ -186,11 +198,13 @@ class HandicapCalculator(toga.App):
 			style=Pack(flex=5)
 		)
 
+
 	def create_invalid_inputs_message(self) -> toga.Label:
 		return toga.Label(
 			"Please provide a value for all four inputs!",
 			style=Pack(padding=(0, 5), color="red", visibility="hidden", flex=1),
 		)
+
 
 	def create_handicap_display(self) -> toga.Box:
 		self.calculate_handicap_index()
@@ -203,8 +217,10 @@ class HandicapCalculator(toga.App):
 
 		return handicap_box
 
+
 	def calculate_round_differential(self, adjusted_gross_score: int, slope: int, rating: float) -> float:
 		return round(((113 / slope) * (adjusted_gross_score - rating)), 1)
+
 
 	def calculate_handicap_index(self) -> float:
 		# TODO: implement overall handicap index calculation logic
@@ -215,6 +231,7 @@ class HandicapCalculator(toga.App):
 			self.handicap_index = "N/A"
 		else:
 			self.handicap_index = calc_handicap_index
+
 
 	def refresh_handicap_index(self) -> None:
 		self.calculate_handicap_index()
