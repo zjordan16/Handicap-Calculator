@@ -5,6 +5,7 @@ This is a mobile/desktop application that can calculate an unofficial USGA handi
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
+from typing import Tuple
 from icecream import ic
 import os
 import polars as pl
@@ -215,7 +216,53 @@ class HandicapCalculator(toga.App):
 	def calculate_round_differential(self, adjusted_gross_score: int, slope: int, rating: float) -> float:
 		return round(((113 / slope) * (adjusted_gross_score - rating)), 1)
 
+	
+	def calculate_rounds_to_use(self) -> Tuple[int, float]:
+		# Calculates total rounds using lazy execution in polars
+		csv_file = self.declare_csv_directory()
+		df = pl.scan_csv(csv_file)
+		total_rounds = df.select(pl.len()).collect().item()
 
+		# Logic for used rounds according to table 5.2a of USGA "Calculation of a Handicap Index"
+		if total_rounds <= 0:
+			used_rounds = 0
+			adjsutment = 0.0
+		elif total_rounds <= 3:
+			used_rounds = 1
+			adjustment = -2.0
+		elif total_rounds <= 4:
+			used_rounds = 1
+			adjsutment = -1.0
+		elif total_rounds <=5:
+			used_rounds = 1
+			adjsutment = 0.0
+		elif total_rounds <= 6:
+			used_rounds = 2
+			adjsutment = -1.0
+		elif total_rounds <= 8:
+			used_rounds = 2
+			adjsutment = 0
+		elif total_rounds <= 11:
+			used_rounds = 3
+			adjsutment = 0
+		elif total_rounds <= 14:
+			used_rounds = 4
+			adjsutment = 0
+		elif total_rounds <= 16:
+			used_rounds = 5
+			adjsutment = 0
+		elif total_rounds <= 18:
+			used_rounds = 6
+			adjsutment = 0
+		elif total_rounds <= 19:
+			used_rounds = 7
+			adjsutment = 0
+		else:
+			used_rounds = 8
+			adjsutment = 0
+		return int(used_rounds), float(adjustment)
+
+	
 	def calculate_handicap_index(self) -> float:
 		# TODO: implement overall handicap index calculation logic
 		# In Progress
