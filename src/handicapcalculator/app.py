@@ -226,48 +226,69 @@ class HandicapCalculator(toga.App):
 		# Logic for used rounds according to table 5.2a of USGA "Calculation of a Handicap Index"
 		if total_rounds <= 0:
 			used_rounds = 0
-			adjsutment = 0.0
+			adjustment = 0.0
 		elif total_rounds <= 3:
 			used_rounds = 1
 			adjustment = -2.0
 		elif total_rounds <= 4:
 			used_rounds = 1
-			adjsutment = -1.0
+			adjustment = -1.0
 		elif total_rounds <=5:
 			used_rounds = 1
-			adjsutment = 0.0
+			adjustment = 0.0
 		elif total_rounds <= 6:
 			used_rounds = 2
-			adjsutment = -1.0
+			adjustment = -1.0
 		elif total_rounds <= 8:
 			used_rounds = 2
-			adjsutment = 0
+			adjustment = 0
 		elif total_rounds <= 11:
 			used_rounds = 3
-			adjsutment = 0
+			adjustment = 0
 		elif total_rounds <= 14:
 			used_rounds = 4
-			adjsutment = 0
+			adjustment = 0
 		elif total_rounds <= 16:
 			used_rounds = 5
-			adjsutment = 0
+			adjustment = 0
 		elif total_rounds <= 18:
 			used_rounds = 6
-			adjsutment = 0
+			adjustment = 0
 		elif total_rounds <= 19:
 			used_rounds = 7
-			adjsutment = 0
+			adjustment = 0
 		else:
 			used_rounds = 8
-			adjsutment = 0
+			adjustment = 0
 		return int(used_rounds), float(adjustment)
 
+	
+	def read_used_rounds(self) -> Tuple[float, list]:
+		used_rounds, adjustment = self.calculate_rounds_to_use()
+		csv_file = self.declare_csv_directory()
+		df = pl.scan_csv(csv_file).collect()
+
+		# If more than 20 total rounds, just use recent 20 for calculations
+		if df.height > 20:
+			df = df.tail(20)
+
+		df = df.sort("differential", descending=True).tail(used_rounds)\
+			.select(["differential"])
+		# USGA rounds handicaps to one decimal
+		handicap = round(df.mean().item(), 1)
+		used_differentials = list(df)
+		return handicap, used_differentials
+
+	
 	
 	def calculate_handicap_index(self) -> float:
 		# TODO: implement overall handicap index calculation logic
 		# In Progress
-		calc_handicap_index = -100  # -100 used to flag invalid calculation of handicap index
+		calc_handicap_index = -100  # -100 = flag
+		# fetch handicap index & used differentials
+		calc_handicap_index, used_differentials = self.read_used_rounds()
 
+		# display handicap index to GUI
 		if calc_handicap_index == -100:
 			self.handicap_index = "N/A"
 		else:
