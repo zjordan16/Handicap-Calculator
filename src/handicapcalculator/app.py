@@ -87,48 +87,46 @@ class HandicapCalculator(toga.App):
 		new_data = {"course_name": course_name, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
 		"rating": float(rating), "differential": float(differential)}
 
-		# Create output directory for csv
-		output_directory = os.path.dirname(__file__)
-		os.makedirs(output_directory, exist_ok=True)
-		csv_file = os.path.join(output_directory, "score_history_table.csv")
+		# Declare file directory for csv
+		csv_file = self.declare_csv_directory()
 
 		# Check if CSV exists, append if exists, create new if it doesn't
 		if os.path.exists(csv_file):
-			# Scan reads dataframes in lazy mode
+			# Scan reads dataframes in lazy mode, pl.LazyFrame() creates new dataframe in lazy mode, concat() combines frames
 			existing_df = pl.scan_csv(csv_file)
-			# .collect() converts dataframe to eager mode for concate/write operations
-			existing_df = existing_df.collect()
-			new_df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
+			new_df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
 			df = pl.concat([existing_df, new_df])
 		else:
-			df = pl.DataFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
-			
+			df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
+
 		# Write new data to list in csv
-		df_lazy = df.lazy()
-		df_lazy.sink_csv(csv_file)
+		df = df.collect().lazy()
+		df.sink_csv(csv_file)
+
+		
+	def declare_csv_directory(self):
+		file_directory = os.path.dirname(__file__)
+		os.makedirs(file_directory, exist_ok=True)
+		return os.path.join(file_directory, "score_history_table.csv")
 
 
 	def display_table(self):
 		self.score_history_table.data.clear()
 
-		# declare csv name and directory
-		file_name = 'score_history_table.csv'
-		file_directory = os.path.dirname(__file__)
-		csv_file = os.path.join(file_directory, file_name)
+		# Declare file directory for csv
+		csv_file = self.declare_csv_directory()
 
 		if os.path.exists(csv_file):
-			# read csv as polars dataframe and save newest 20 rounds to new dataframe (newest_20)
-			df = pl.scan_csv(csv_file)
-			df = df.collect()
-			newest_20 = df.tail(20)
+			# read newest 20 rows from csv
+			df = pl.scan_csv(csv_file).tail(20).collect()
 
 			# loop displays newest 20 games to table from newest to oldest
-			for row in reversed(list(newest_20.iter_rows(named=True))):
-				self.score_history_table.data.append([str(row[newest_20.columns[0]]),
-													  str(row[newest_20.columns[1]]),
-													  str(row[newest_20.columns[2]]),
-													  str(row[newest_20.columns[3]]),
-													  str(row[newest_20.columns[4]]),
+			for row in reversed(list(df.iter_rows(named=True))):
+				self.score_history_table.data.append([str(row[df.columns[0]]),
+													  str(row[df.columns[1]]),
+													  str(row[df.columns[2]]),
+													  str(row[df.columns[3]]),
+													  str(row[df.columns[4]]),
 													  ])
 		else:
 			# display blank table
