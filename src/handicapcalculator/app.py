@@ -58,18 +58,20 @@ class HandicapCalculator(toga.App):
 	def save_score(self, widget):
 		inputs_are_valid = (
 				self.course_name_input.children[1].value and self.score_input.children[1].value and
-				self.course_slope_input.children[1].value and self.course_rating_input.children[1].value
+				self.course_slope_input.children[1].value and self.course_rating_input.children[1].value and
+				self.date_input.children[1].value
 		)
 		if inputs_are_valid:
 			# Get Inputs
 			course_name = self.course_name_input.children[1].value
+			date = self.date_input.children[1].value
 			adjusted_gross_score = self.score_input.children[1].value
 			slope = self.course_slope_input.children[1].value
 			rating = self.course_rating_input.children[1].value
 			differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
 
    			# Write inputs to CSV
-			self.write_to_csv(course_name, adjusted_gross_score, slope, rating, differential)
+			self.write_to_csv(course_name, date, adjusted_gross_score, slope, rating, differential)
 			
 			# Refresh handicap and table
 			self.refresh_handicap_index()
@@ -85,9 +87,9 @@ class HandicapCalculator(toga.App):
 			self.invalid_inputs_message.style.visibility = "visible"
 
 
-	def write_to_csv(self, course_name: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
+	def write_to_csv(self, course_name: str, date: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
 		# declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
-		new_data = {"course_name": course_name, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
+		new_data = {"course_name": course_name, "date": date, "adjusted_gross_score": int(adjusted_gross_score),"slope": int(slope),
 		"rating": float(rating), "differential": float(differential)}
 
 		# Declare file directory for csv
@@ -97,10 +99,10 @@ class HandicapCalculator(toga.App):
 		if os.path.exists(csv_file):
 			# Scan reads dataframes in lazy mode, pl.LazyFrame() creates new dataframe in lazy mode, concat() combines frames
 			existing_df = pl.scan_csv(csv_file)
-			new_df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
+			new_df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "date": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
 			df = pl.concat([existing_df, new_df])
 		else:
-			df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
+			df = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8, "date": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64, "rating": pl.Float64, "differential": pl.Float64})
 
 		# Write new data to list in csv
 		df = df.collect().lazy()
@@ -125,12 +127,14 @@ class HandicapCalculator(toga.App):
 
 			# loop displays newest 20 games to table from newest to oldest
 			for row in reversed(list(df.iter_rows(named=True))):
-				self.score_history_table.data.append([str(row[df.columns[0]]),
-													  str(row[df.columns[1]]),
-													  str(row[df.columns[2]]),
-													  str(row[df.columns[3]]),
-													  str(row[df.columns[4]]),
-													  ])
+				self.score_history_table.data.append(
+					[str(row[df.columns[0]]),
+					 str(row[df.columns[1]]),
+					 str(row[df.columns[2]]),
+					 str(row[df.columns[3]]),
+					 str(row[df.columns[4]]),
+					 str(row[df.columns[5]])
+					])
 		else:
 			# display blank table
 			self.score_history_table.data.clear()
@@ -203,7 +207,7 @@ class HandicapCalculator(toga.App):
 
 	def create_score_history_table(self) -> toga.Table:
 		return toga.Table(
-			headings=["Course Name", "Adjusted Gross Score", "Course Rating", "Course Slope Rating",
+			headings=["Course Name", "Date", "Adjusted Gross Score", "Course Rating", "Course Slope Rating",
 					  "Round Differential"],
 			style=Pack(flex=5)
 		)
@@ -233,10 +237,16 @@ class HandicapCalculator(toga.App):
 
 	
 	def calculate_rounds_to_use(self) -> Tuple[int, float]:
+		# Reset total_rounds
+		total_rounds = 0
+
 		# Calculates total rounds using lazy execution in polars
 		csv_file = self.declare_csv_directory()
-		df = pl.scan_csv(csv_file)
-		total_rounds = df.select(pl.len()).collect().item()
+		if os.path.exists(csv_file):
+			df = pl.scan_csv(csv_file)
+			total_rounds = df.select(pl.len()).collect().item()
+		else:
+			total_rounds = 0
 
 		# Logic for used rounds according to table 5.2a of USGA "Calculation of a Handicap Index"
 		if total_rounds <= 0:
@@ -280,18 +290,23 @@ class HandicapCalculator(toga.App):
 	
 	def read_used_rounds(self) -> Tuple[float, list]:
 		used_rounds, adjustment = self.calculate_rounds_to_use()
-		csv_file = self.declare_csv_directory()
-		df = pl.scan_csv(csv_file).collect()
+		if used_rounds > 0:
+			csv_file = self.declare_csv_directory()
+			df = pl.scan_csv(csv_file).collect()
 
-		# If more than 20 total rounds, just use recent 20 for calculations
-		if df.height > 20:
-			df = df.tail(20)
+			# If more than 20 total rounds, just use recent 20 for calculations
+			if df.height > 20:
+				df = df.tail(20)
 
-		df = df.sort("differential", descending=True).tail(used_rounds)\
-			.select(["differential"])
-		# USGA rounds handicaps to one decimal
-		handicap = round(df.mean().item(), 1)
-		used_differentials = list(df)
+			df = df.sort("differential", descending=True).tail(used_rounds)\
+				.select(["differential"])
+			# USGA rounds handicaps to one decimal
+			handicap = round(df.mean().item(), 1)
+			used_differentials = list(df)
+		else:
+			handicap = -100
+			used_differentials = 0
+			
 		return handicap, used_differentials
 
 	
