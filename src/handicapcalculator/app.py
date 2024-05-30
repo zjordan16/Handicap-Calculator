@@ -17,6 +17,7 @@ class HandicapCalculator(toga.App):
 
 		# Create Inputs
 		self.course_name_input = self.create_course_name_input()
+		self.date_input = self.create_date_input()
 		self.score_input = self.create_score_input()
 		self.course_slope_input = self.create_slope_input()
 		self.course_rating_input = self.create_course_rating_input()
@@ -31,6 +32,7 @@ class HandicapCalculator(toga.App):
 
 		# Add inputs to main box
 		main_box.add(self.course_name_input)
+		main_box.add(self.date_input)
 		main_box.add(self.score_input)
 		main_box.add(self.course_rating_input)
 		main_box.add(self.course_slope_input)
@@ -184,6 +186,19 @@ class HandicapCalculator(toga.App):
 		course_rating_box.add(course_rating_input)
 
 		return course_rating_box
+
+
+	def create_date_input(self) -> toga.Box:
+		date_label = toga.Label(
+			"Date: ",
+			style=Pack(padding=(0, 5)),
+		)
+		date_input = toga.DateInput()
+		date_box = toga.Box(style=Pack(direction=ROW, padding = 5, flex=1))
+		date_box.add(date_label)
+		date_box.add(date_input)
+
+		return date_box
 
 
 	def create_score_history_table(self) -> toga.Table:
