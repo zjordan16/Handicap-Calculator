@@ -71,11 +71,9 @@ class LoginPage:
     # is called if we don't have the second argument present.
     # TODO: Figure out why that happens and fix it.
     def validate_login(self, o) -> None:
-        print("validating login")
         username = self.username_input.children[1].value
         password = self.password_input.children[1].value
         if self.check_login_credentials(username, password):
-            print("logged in")
             self.login_failed_message.style.visibility = "hidden"
             self.logged_in = True
             self.login_callback()
