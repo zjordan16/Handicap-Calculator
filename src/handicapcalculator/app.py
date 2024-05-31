@@ -7,13 +7,22 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from typing import Tuple
 from dateutil.parser import parse
+from .pages import LoginPage
 import os
 import polars as pl
 
 
 class HandicapCalculator(toga.App):
     def startup(self):
-        main_box = toga.Box(style=Pack(direction=COLUMN))
+        self.calculator_page = self.create_calculator_page()
+        self.login_page = LoginPage()
+        self.login_page_content = self.login_page.create(self.check_login)
+        self.main_window = toga.MainWindow(title="Handicap Calculator")
+        self.main_window.content = self.login_page_content
+        self.main_window.show()
+
+    def create_calculator_page(self) -> toga.Box:
+        calculator_page = toga.Box(style=Pack(direction=COLUMN))
 
         # Create Inputs
         self.course_name_input = self.create_course_name_input()
@@ -31,30 +40,25 @@ class HandicapCalculator(toga.App):
         )
 
         # Add inputs to main box
-        main_box.add(self.course_name_input)
-        main_box.add(self.date_input)
-        main_box.add(self.score_input)
-        main_box.add(self.course_rating_input)
-        main_box.add(self.course_slope_input)
-        main_box.add(self.invalid_inputs_message)
-        main_box.add(save_round_button)
+        calculator_page.add(self.course_name_input)
+        calculator_page.add(self.date_input)
+        calculator_page.add(self.score_input)
+        calculator_page.add(self.course_rating_input)
+        calculator_page.add(self.course_slope_input)
+        calculator_page.add(self.invalid_inputs_message)
+        calculator_page.add(save_round_button)
 
         # Create table to show saved rounds
         self.score_history_table = self.create_score_history_table()
-        main_box.add(self.score_history_table)
+        calculator_page.add(self.score_history_table)
 
         # Create display for handicap
         self.handicap_display = self.create_handicap_display()
-        main_box.add(self.handicap_display)
+        calculator_page.add(self.handicap_display)
 
-        self.main_window = toga.MainWindow(title="Handicap Calculator")
-        self.main_window.content = main_box
-        self.main_window.show()
+        return calculator_page
 
-        # Display table on startup
-        self.display_table()
-
-    def save_score(self, widget):
+    def save_score(self, widget) -> None:
         inputs_are_valid = (
                 self.course_name_input.children[1].value and self.score_input.children[1].value and
                 self.course_slope_input.children[1].value and self.course_rating_input.children[1].value and
@@ -79,6 +83,7 @@ class HandicapCalculator(toga.App):
             # Clear inputs
             self.invalid_inputs_message.style.visibility = "hidden"
             self.course_name_input.children[1].value = None
+            self.date_input.children[1].value = None
             self.score_input.children[1].value = None
             self.course_slope_input.children[1].value = None
             self.course_rating_input.children[1].value = None
@@ -210,7 +215,7 @@ class HandicapCalculator(toga.App):
 
     def create_invalid_inputs_message(self) -> toga.Label:
         return toga.Label(
-            "Please provide a value for all four inputs!",
+            "Please provide a value for all inputs!",
             style=Pack(padding=(0, 5), color="red", visibility="hidden", flex=1),
         )
 
@@ -317,6 +322,13 @@ class HandicapCalculator(toga.App):
         self.calculate_handicap_index()
         self.handicap_display.children[0].text = f"Handicap Index: {self.handicap_index}"
 
+    def check_login(self) -> None:
+        print("checking if logged in")
+        if self.login_page.logged_in:
+            self.main_window.content = self.calculator_page
+            self.main_window.show()
+            # Display table on startup
+            self.display_table()
 
 def main():
     return HandicapCalculator()
