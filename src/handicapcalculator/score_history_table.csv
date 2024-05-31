@@ -1,7 +1,8 @@
 course_name,date,adjusted_gross_score,slope,rating,differential
-Windrose,,75,120,72.0,2.8
-Windrose,,72,123,72.0,0.0
-Windrose,,75,124,71.0,3.6
-Windrose,,80,120,72.0,7.5
-Windrose,,88,120,72.0,15.1
-Windrose,,88,120,72.0,15.1
+Windrose,2024-05-25,75,120,72.0,2.8
+Windrose,2024-05-26,72,123,72.0,0.0
+Windrose,2024-05-27,75,124,71.0,3.6
+Windrose,2024-05-28,80,120,72.0,7.5
+Windrose,2024-05-29,88,120,72.0,15.1
+Windrose,2024-05-30,88,120,72.0,15.1
+Windrose,2024-05-31,86,72,85.0,1.6
