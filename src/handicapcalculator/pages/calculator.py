@@ -195,7 +195,7 @@ class CalculatorPage:
 
     def create_date_input(self) -> toga.Box:
         date_label = toga.Label(
-            "Date (yyyy-MM-dd): ",
+            "Date (mm/dd): ",
             style=Pack(padding=(0, 5), flex=1),
         )
         date_input = toga.TextInput(style=Pack(flex=2))
