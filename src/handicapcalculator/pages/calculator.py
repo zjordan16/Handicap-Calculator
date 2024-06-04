@@ -3,6 +3,7 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 from typing import Tuple
 from dateutil.parser import parse
+from datetime import datetime, timedelta
 import os
 import polars as pl
 
@@ -118,6 +119,24 @@ class CalculatorPage:
         file_directory = os.path.dirname(__file__)
         os.makedirs(file_directory, exist_ok=True)
         return os.path.join(file_directory, "score_history_table.csv")
+
+    def get_date_one_year_ago(self) -> str:
+        # read most recent round date
+        csv_file = self.declare_csv_directory()
+
+        if os.path.exists(csv_file):
+            df = pl.scan_csv(csv_file).select(pl.col("date")).tail(1).collect()
+            current_date = df[0, "date"]
+
+            # get previous date
+            date_obj = datetime.strptime(current_date, "%Y-%m-%d")
+            prev_date = date_obj.replace(year=date_obj.year - 1)
+            prev_date = prev_date.strftime("%Y-%m-%d")
+        else:
+            current_date = "N/A"
+            prev_date = "Error Fetching Date"
+
+        return prev_date    
 
     def display_table(self):
         self.score_history_table.data.clear()
