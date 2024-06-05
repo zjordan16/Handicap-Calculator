@@ -52,6 +52,12 @@ class CalculatorPage:
         self.content.add(self.score_history_table)
         self.display_table()
 
+        ### FOR TESTING ONLY ###
+        date = self.get_date_one_year_ago()
+        lhi = self.calculate_low_handicap_index(date)
+        print("Low HI: ", lhi)
+        ########################
+
         # Create display for handicap
         self.handicap_display = self.create_handicap_display()
         self.content.add(self.handicap_display)
@@ -335,6 +341,29 @@ class CalculatorPage:
             self.handicap_index = "N/A"
         else:
             self.handicap_index = calc_handicap_index
+
+    def calculate_low_handicap_index(self, date: str) -> float:
+        # declare variables
+        GROUP_SIZE = 20
+        low_handicap_index = float('inf')
+        csv_file = self.declare_csv_directory()
+
+        # Run query
+        if os.path.exists(csv_file):
+            df = pl.scan_csv(csv_file).filter(pl.col('date') >= date)
+            df = df.sort('date', descending=True).collect()
+            for i in range(len(df) - GROUP_SIZE + 1):
+                group = df.slice(i, GROUP_SIZE)
+                if len(group) == GROUP_SIZE:
+                    low_8 = group.sort('differential').head(8)
+                    mean_low_8 = low_8.select(pl.col('differential').mean())[0,0]
+                    print(mean_low_8)
+                    if mean_low_8 < low_handicap_index:
+                        low_handicap_index = mean_low_8
+        else:
+            low_handicap_index = -100
+            
+        return round(low_handicap_index, 1) if low_handicap_index != float('inf') else -100
 
     def refresh_handicap_index(self) -> None:
         self.calculate_handicap_index()
