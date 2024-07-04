@@ -98,13 +98,12 @@ class CalculatorPage:
 
     def write_to_csv(self, course_name: str, date: str, adjusted_gross_score: int, rating: float, slope: int, differential: float):        
         # declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
-		new_data = {"course_name": course_name, 
-					"date": date, 
-					"adjusted_gross_score": int(adjusted_gross_score),
-					"rating": float(rating),
-					"slope": int(slope),
-					"differential": float(differential)}
-
+	new_data = {"course_name": course_name, 
+			"date": date, 
+			"adjusted_gross_score": int(adjusted_gross_score),
+			"rating": float(rating),
+			"slope": int(slope),
+			"differential": float(differential)}
         # Declare file directory for csv
         csv_file = self.declare_csv_directory()
 
