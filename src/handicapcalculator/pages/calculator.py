@@ -75,12 +75,12 @@ class CalculatorPage:
             course_name = self.course_name_input.children[1].value
             date = parse(self.date_input.children[1].value).strftime("%Y-%m-%d")
             adjusted_gross_score = self.score_input.children[1].value
-            slope = self.course_slope_input.children[1].value
             rating = self.course_rating_input.children[1].value
-            differential = self.calculate_round_differential(adjusted_gross_score, slope, rating)
+            slope = self.course_slope_input.children[1].value
+            differential = self.calculate_round_differential(adjusted_gross_score, rating, slope)
 
             # Write inputs to CSV
-            self.write_to_csv(course_name, date, adjusted_gross_score, slope, rating, differential)
+            self.write_to_csv(course_name, date, adjusted_gross_score, rating, slope, differential)
 
             # Refresh handicap and table
             self.refresh_handicap_index()
@@ -96,10 +96,14 @@ class CalculatorPage:
         else:
             self.invalid_inputs_message.style.visibility = "visible"
 
-    def write_to_csv(self, course_name: str, date: str, adjusted_gross_score: int, slope: int, rating: float, differential: float):
+    def write_to_csv(self, course_name: str, date: str, adjusted_gross_score: int, rating: float, slope: int, differential: float):        
         # declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
-        new_data = {"course_name": course_name, "date": date, "adjusted_gross_score": int(adjusted_gross_score), "slope": int(slope),
-                    "rating": float(rating), "differential": float(differential)}
+		new_data = {"course_name": course_name, 
+					"date": date, 
+					"adjusted_gross_score": int(adjusted_gross_score),
+					"rating": float(rating),
+					"slope": int(slope),
+					"differential": float(differential)}
 
         # Declare file directory for csv
         csv_file = self.declare_csv_directory()
@@ -109,13 +113,21 @@ class CalculatorPage:
             # Scan reads dataframes in lazy mode, pl.LazyFrame() creates new dataframe in lazy mode, concat() combines frames
             existing_df = pl.scan_csv(csv_file)
             new_df = pl.LazyFrame(new_data,
-                                  schema={"course_name": pl.Utf8, "date": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64,
-                                          "rating": pl.Float64, "differential": pl.Float64})
+								  schema={"course_name": pl.Utf8, 
+										  "date": pl.Utf8, 
+										  "adjusted_gross_score": pl.Int64,
+										  "rating": pl.Float64,
+										  "slope": pl.Int64,
+										  "differential": pl.Float64})
             df = pl.concat([existing_df, new_df])
         else:
             df = pl.LazyFrame(new_data,
-                              schema={"course_name": pl.Utf8, "date": pl.Utf8, "adjusted_gross_score": pl.Int64, "slope": pl.Int64,
-                                      "rating": pl.Float64, "differential": pl.Float64})
+								  schema={"course_name": pl.Utf8, 
+										  "date": pl.Utf8, 
+										  "adjusted_gross_score": pl.Int64,
+										  "rating": pl.Float64,
+										  "slope": pl.Int64,
+										  "differential": pl.Float64})
 
         # Write new data to list in csv
         df = df.collect().lazy()
@@ -254,7 +266,7 @@ class CalculatorPage:
 
         return handicap_box
 
-    def calculate_round_differential(self, adjusted_gross_score: int, slope: int, rating: float) -> float:
+    def calculate_round_differential(self, adjusted_gross_score: int, rating: float, slope: int) -> float:
         return round(((113 / slope) * (adjusted_gross_score - rating)), 1)
 
     def calculate_rounds_to_use(self) -> Tuple[int, float]:
