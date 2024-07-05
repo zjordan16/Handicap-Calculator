@@ -9,7 +9,7 @@ import polars as pl
 
 
 class CalculatorPage:
-    def __init__(self):
+    def __init__(self)
         self.content = None
         self.handicap_display = None
         self.score_history_table = None
@@ -112,24 +112,23 @@ class CalculatorPage:
             # Scan reads dataframes in lazy mode, pl.LazyFrame() creates new dataframe in lazy mode, concat() combines frames
             existing_df = pl.scan_csv(csv_file)
             new_df = pl.LazyFrame(new_data,
-								  schema={"course_name": pl.Utf8, 
-										  "date": pl.Utf8, 
-										  "adjusted_gross_score": pl.Int64,
-										  "rating": pl.Float64,
-										  "slope": pl.Int64,
-										  "differential": pl.Float64})
+				  schema={"course_name": pl.Utf8, 
+					  "date": pl.Utf8, 
+					  "adjusted_gross_score": pl.Int64,
+					  "rating": pl.Float64,
+					  "slope": pl.Int64,
+					  "differential": pl.Float64})
             df = pl.concat([existing_df, new_df])
         else:
             df = pl.LazyFrame(new_data,
-								  schema={"course_name": pl.Utf8, 
-										  "date": pl.Utf8, 
-										  "adjusted_gross_score": pl.Int64,
-										  "rating": pl.Float64,
-										  "slope": pl.Int64,
-										  "differential": pl.Float64})
-
+			      schema={"course_name": pl.Utf8, 
+				      "date": pl.Utf8, 
+				      "adjusted_gross_score": pl.Int64,
+				      "rating": pl.Float64,
+				      "slope": pl.Int64,
+				      "differential": pl.Float64})
         # Write new data to list in csv
-        df = df.collect().lazy()
+	df = df.collect().sort(by="date", descending=False).lazy()
         df.sink_csv(csv_file)
 
     def declare_csv_directory(self):
@@ -275,8 +274,8 @@ class CalculatorPage:
         # Calculates total rounds using lazy execution in polars
         csv_file = self.declare_csv_directory()
         if os.path.exists(csv_file):
-            df = pl.scan_csv(csv_file)
-            total_rounds = df.select(pl.len()).collect().item()
+            lf = pl.scan_csv(csv_file)
+            total_rounds = lf.select(pl.len()).collect().item()
         else:
             total_rounds = 0
 
@@ -344,7 +343,7 @@ class CalculatorPage:
         # TODO: implement overall handicap index calculation logic
         # In Progress
         calc_handicap_index = -100  # -100 = flag
-        # fetch handicap index & used differentials
+        # fetch handicap index & number of used differentials
         calc_handicap_index, used_differentials = self.read_used_rounds()
 
         # display handicap index to GUI
