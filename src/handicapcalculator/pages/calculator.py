@@ -52,12 +52,6 @@ class CalculatorPage:
         self.content.add(self.score_history_table)
         self.display_table()
 
-        ### FOR TESTING ONLY ###
-        date = self.get_date_one_year_ago()
-        lhi = self.calculate_low_handicap_index(date)
-        print("Low HI: ", lhi)
-        ########################
-
         # Create display for handicap
         self.handicap_display = self.create_handicap_display()
         self.content.add(self.handicap_display)
@@ -339,25 +333,45 @@ class CalculatorPage:
 
         return handicap, used_differentials
 
+	def limit_on_upward_movement(self, current_handicap: float, low_handicap: float) -> float:
+		if current_handicap > low_handicap:
+			handicap_delta = current_handicap - low_handicap
+			if handicap_delta >= 3:
+				# Hard cap ceiling (USGA 5.8 Limit on Upward Movement of a Handicap Index)
+				if handicap_delta >= 5:
+					current_handicap = low_handicap + 5
+				# Soft cap trigger (USGA 5.8 Limit on Upward Movement of a Handicap Index)
+				else:
+					current_handicap = low_handicap + 3 + ((handicap_delta - 3) * 0.5)
+		else:
+			pass
+		return current_handicap
+	
     def calculate_handicap_index(self) -> float:
-        # TODO: implement overall handicap index calculation logic
-        # In Progress
-        calc_handicap_index = -100  # -100 = flag
-        # fetch handicap index & number of used differentials
-        calc_handicap_index, used_differentials = self.read_used_rounds()
+	# TODO: implement overall handicap index calculation logic
+	# In Progress
+	current_handicap_index = -100  # -100 = flag
+	# fetch handicap index & number of used differentials
+	current_handicap_index, used_differentials = self.read_used_rounds()
+	
+	low_handicap_index = self.calculate_low_handicap_index()
+	print("Low HI: ", low_handicap_index)
+	print("Current HI:", current_handicap_index)
+	current_handicap_index = self.limit_on_upward_movement(current_handicap_index, low_handicap_index)
+	
+	# display handicap index to GUI
+	if current_handicap_index == -100:
+		self.handicap_index = "N/A"
+	else:
+		self.handicap_index = current_handicap_index
 
-        # display handicap index to GUI
-        if calc_handicap_index == -100:
-            self.handicap_index = "N/A"
-        else:
-            self.handicap_index = calc_handicap_index
-
-    def calculate_low_handicap_index(self, date: str) -> float:
+    def calculate_low_handicap_index(self) -> float:
         # declare variables
         GROUP_SIZE = 20
         low_handicap_index = float('inf')
         csv_file = self.declare_csv_directory()
-
+		date = self.get_date_one_year_ago()
+		#TODO (low handicap does not calculate when data frame is under 20 entries)
         # Run query
         if os.path.exists(csv_file):
             df = pl.scan_csv(csv_file).filter(pl.col('date') >= date)
