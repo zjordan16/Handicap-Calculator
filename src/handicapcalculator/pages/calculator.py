@@ -9,7 +9,7 @@ import polars as pl
 
 
 class CalculatorPage:
-    def __init__(self)
+    def __init__(self):
         self.content = None
         self.handicap_display = None
         self.score_history_table = None
