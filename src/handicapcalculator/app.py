@@ -8,7 +8,7 @@ from .pages import CalculatorPage, LoginPage
 
 class HandicapCalculator(toga.App):
     def startup(self):
-        self.calculator_page = CalculatorPage().create()
+        self.calculator_page = CalculatorPage().Frontend().create()
         self.login_page = LoginPage()
         self.login_page_content = self.login_page.create(self.check_login)
         self.main_window = toga.MainWindow(title="Handicap Calculator")
