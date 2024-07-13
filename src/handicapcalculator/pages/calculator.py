@@ -250,47 +250,50 @@ class CalculatorPage:
 
             return os.path.join(file_directory, "score_history_table.csv")
 
-        # TODO: Continue adding type annotations and correcting static methods
         def write_to_csv(self, course_name: str, date: str, adjusted_gross_score: int, rating: float, slope: int,
                          differential: float) -> None:
             # declare new_data as dictionary for polars, typecast to match datatypes with polars dataframe
-            new_data = {"course_name": course_name,
-                        "date": date,
-                        "adjusted_gross_score": int(adjusted_gross_score),
-                        "rating": float(rating),
-                        "slope": int(slope),
-                        "differential": float(differential)}
+            new_data: dict = {"course_name": course_name, "date": date,
+                              "adjusted_gross_score": int(adjusted_gross_score),
+                              "rating": float(rating),
+                              "slope": int(slope),
+                              "differential": float(differential)
+                              }
             # Declare file directory for csv
-            csv_file = self.declare_csv_directory()
+            csv_file: str = self.declare_csv_directory()
 
             # Check if CSV exists, append if exists, create new if it doesn't
             if os.path.exists(csv_file):
                 # Scan reads dataframes in lazy mode, pl.LazyFrame() creates new dataframe in lazy mode,
                 # concat() combines frames
-                existing_df = pl.scan_csv(csv_file)
-                new_df = pl.LazyFrame(new_data,
-                                      schema={"course_name": pl.Utf8,
-                                              "date": pl.Utf8,
-                                              "adjusted_gross_score": pl.Int64,
-                                              "rating": pl.Float64,
-                                              "slope": pl.Int64,
-                                              "differential": pl.Float64})
-                df = pl.concat([existing_df, new_df])
+                existing_lf: pl.lazyframe = pl.scan_csv(csv_file)
+                new_lf: pl.lazyframe = pl.LazyFrame(new_data,
+                                                    schema={"course_name": pl.Utf8,
+                                                            "date": pl.Utf8,
+                                                            "adjusted_gross_score": pl.Int64,
+                                                            "rating": pl.Float64,
+                                                            "slope": pl.Int64,
+                                                            "differential": pl.Float64}
+                                                    )
+                lf: pl.lazyframe.frame = pl.concat([existing_lf, new_lf])
             else:
-                df = pl.LazyFrame(new_data,
-                                  schema={"course_name": pl.Utf8,
-                                          "date": pl.Utf8,
-                                          "adjusted_gross_score": pl.Int64,
-                                          "rating": pl.Float64,
-                                          "slope": pl.Int64,
-                                          "differential": pl.Float64})
+                lf: pl.lazyframe = pl.LazyFrame(new_data, schema={"course_name": pl.Utf8,
+                                                                  "date": pl.Utf8,
+                                                                  "adjusted_gross_score": pl.Int64,
+                                                                  "rating": pl.Float64,
+                                                                  "slope": pl.Int64,
+                                                                  "differential": pl.Float64
+                                                                  }
+                                                )
 
             # Write new data to list in csv
-            df = df.collect().sort(by="date", descending=False).lazy()
+            # Collect() converts lazyframe to dataframe to read data; lazy() converts dataframe back to lazyframe
+            df: pl.lazyframe = lf.collect().sort(by="date", descending=False).lazy()
             df.sink_csv(csv_file)
 
             return
 
+        # TODO: Continue adding type annotations and correcting static methods
         def calculate_handicap_index(self) -> None:
             # -100 used as flag for invalid cases of handicap index
             current_handicap_index = -100
