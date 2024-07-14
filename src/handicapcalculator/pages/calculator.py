@@ -1,11 +1,13 @@
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from typing import Tuple
+from typing import Tuple, Union
 from dateutil.parser import parse
 from datetime import datetime
 import os
 import polars as pl
+
+from .login import LoginPage
 
 
 class CalculatorPage:
@@ -15,33 +17,34 @@ class CalculatorPage:
     # Frontend Inner Class
     class Frontend:
         def __init__(self) -> None:
-            self.content = None
-            self.handicap_display = None
-            self.score_history_table = None
-            self.invalid_inputs_message = None
-            self.course_rating_input = None
-            self.course_slope_input = None
-            self.score_input = None
-            self.date_input = None
-            self.course_name_input = None
-            self.scorecap_display = None
+            self.login_page = LoginPage()
             self.backend = CalculatorPage().Backend()
+            self.score_history_table = None
+            self.content: toga.Box = toga.Box()
+            self.handicap_display: toga.Box = toga.Box()
+            self.invalid_inputs_message: toga.Label = toga.Label("")
+            self.course_rating_input: toga.Box = toga.Box()
+            self.course_slope_input: toga.Box = toga.Box()
+            self.score_input: toga.Box = toga.Box()
+            self.date_input: toga.Box = toga.Box()
+            self.course_name_input: toga.Box = toga.Box()
+            self.scorecap_display: toga.Box = toga.Box()
             return
 
         def create(self) -> toga.Box:
-            self.content: toga.Box = toga.Box(style=Pack(direction=COLUMN))
+            self.content = toga.Box(style=Pack(direction=COLUMN))
 
             # Create Inputs
-            self.course_name_input: toga.Box = self.create_course_name_input()
-            self.date_input: toga.Box = self.create_date_input()
-            self.score_input: toga.Box = self.create_score_input()
-            self.course_slope_input: toga.Box = self.create_slope_input()
-            self.course_rating_input: toga.Box = self.create_course_rating_input()
-            self.invalid_inputs_message: toga.Label = self.create_invalid_inputs_message()
+            self.course_name_input = self.create_course_name_input()
+            self.date_input = self.create_date_input()
+            self.score_input = self.create_score_input()
+            self.course_slope_input = self.create_slope_input()
+            self.course_rating_input = self.create_course_rating_input()
+            self.invalid_inputs_message = self.create_invalid_inputs_message()
 
             # Create button to save inputs
             save_round_button: toga.Button = toga.Button("Save Round Information",
-                                                         on_press=self.save_score,
+                                                         on_press=self.save_score,  # type: ignore
                                                          style=Pack(padding=5),
                                                          )
 
@@ -55,27 +58,19 @@ class CalculatorPage:
             self.content.add(save_round_button)
 
             # Create table to show saved rounds
-            self.score_history_table: toga.Table = self.create_score_history_table()
+            self.score_history_table = self.create_score_history_table()
             self.content.add(self.score_history_table)
             self.display_table()
 
             # Create display for handicap
-            self.handicap_display: toga.Box = self.create_handicap_display()
+            self.handicap_display = self.create_handicap_display()
             self.content.add(self.handicap_display)
 
             # Create display for soft and hard cap
-            self.scorecap_display: toga.Box = self.create_scorecap_display()
+            self.scorecap_display = self.create_scorecap_display()
             self.content.add(self.scorecap_display)
 
             return self.content
-
-        def check_login(self) -> None:
-            if self.login_page.logged_in:
-                self.main_window.content = self.calculator_page
-                self.main_window.show()
-                # Display table on startup
-                self.display_table()
-            return
 
         @staticmethod
         def create_course_name_input() -> toga.Box:
@@ -94,7 +89,7 @@ class CalculatorPage:
             score_name_label: toga.Label = toga.Label("Adjusted Gross Score: ",
                                                       style=Pack(padding=(0, 5), flex=1),
                                                       )
-            score_input: toga.NumberInput = toga.NumberInput(min=1, step=1, style=Pack(flex=2))
+            score_input: toga.NumberInput = toga.NumberInput(min=1, step=1, style=Pack(flex=2))  # type: ignore
             score_box: toga.Box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
             score_box.add(score_name_label)
             score_box.add(score_input)
@@ -106,7 +101,12 @@ class CalculatorPage:
             slope_label: toga.Label = toga.Label("Course Slope Rating: ",
                                                  style=Pack(padding=(0, 5), flex=1),
                                                  )
-            slope_input: toga.NumberInput = toga.NumberInput(min=55, max=155, step=1, style=Pack(flex=2))
+            slope_input: toga.NumberInput = toga.NumberInput(min=55,  # type: ignore
+                                                             max=155,  # type: ignore
+                                                             step=1,
+                                                             style=Pack(flex=2)
+                                                             )
+
             slope_box: toga.Box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
             slope_box.add(slope_label)
             slope_box.add(slope_input)
@@ -118,7 +118,11 @@ class CalculatorPage:
             course_rating_label: toga.Label = toga.Label("Course Rating: ",
                                                          style=Pack(padding=(0, 5), flex=1),
                                                          )
-            course_rating_input: toga.NumberInput = toga.NumberInput(min=55, max=85, step=0.1, style=Pack(flex=2))
+            course_rating_input: toga.NumberInput = toga.NumberInput(min=55,  # type: ignore
+                                                                     max=85,  # type: ignore
+                                                                     step=0.1,
+                                                                     style=Pack(flex=2)
+                                                                     )
             course_rating_box: toga.Box = toga.Box(style=Pack(direction=ROW, padding=5, flex=1))
             course_rating_box.add(course_rating_label)
             course_rating_box.add(course_rating_input)
@@ -196,7 +200,7 @@ class CalculatorPage:
             self.scorecap_display.children[0].text = f"{self.backend.scorecap}"
             return
 
-        def save_score(self, widget) -> None:
+        def save_score(self, widget: toga.Button) -> None:
             inputs_are_valid = (self.course_name_input.children[1].value and
                                 self.score_input.children[1].value and
                                 self.course_slope_input.children[1].value and
@@ -222,21 +226,22 @@ class CalculatorPage:
                 self.refresh_handicap_index()
                 self.display_table()
                 # Clear inputs
-                self.invalid_inputs_message.style.visibility: str = "hidden"
+                self.invalid_inputs_message.style.visibility = "hidden"
                 self.course_name_input.children[1].value = None
                 self.date_input.children[1].value = None
                 self.score_input.children[1].value = None
                 self.course_slope_input.children[1].value = None
                 self.course_rating_input.children[1].value = None
             else:
-                self.invalid_inputs_message.style.visibility: str = "visible"
+                self.invalid_inputs_message.style.visibility = "visible"
+
             return
 
     # Backend Inner Class
     class Backend:
         def __init__(self) -> None:
-            self.handicap_index = None
-            self.scorecap = None
+            self.handicap_index: Union[str, float] = ""
+            self.scorecap: str = ""
             return
 
         @staticmethod
@@ -293,14 +298,19 @@ class CalculatorPage:
 
             return
 
-        # TODO: Continue adding type annotations and correcting static methods
         def calculate_handicap_index(self) -> None:
             # -100 used as flag for invalid cases of handicap index
-            current_handicap_index = -100
+            current_handicap_index: float = -100.0
+            used_differentials: int
+
             current_handicap_index, used_differentials = self.calculate_current_handicap()
             print("Current HI: ", current_handicap_index)
-            low_handicap_index = self.calculate_low_handicap_index(current_handicap_index, used_differentials)
+            low_handicap_index: float = self.calculate_low_handicap_index(current_handicap_index, used_differentials)
             print("Low HI: ", low_handicap_index)
+
+            soft_cap: bool
+            hard_cap: bool
+
             current_handicap_index, soft_cap, hard_cap = self.limit_on_upward_movement(current_handicap_index,
                                                                                        low_handicap_index)
 
@@ -441,7 +451,7 @@ class CalculatorPage:
 
                 # get previous date
                 date_obj = datetime.strptime(current_date, "%Y-%m-%d")
-                prev_date = date_obj.replace(year=date_obj.year - 1)
+                prev_date: Union[datetime, str] = date_obj.replace(year=date_obj.year - 1)
                 prev_date = prev_date.strftime("%Y-%m-%d")
             else:
                 current_date = "N/A"
@@ -449,7 +459,8 @@ class CalculatorPage:
 
             return prev_date
 
-        def limit_on_upward_movement(self, current_handicap: float, low_handicap: float) -> Tuple[float, bool, bool]:
+        @staticmethod
+        def limit_on_upward_movement(current_handicap: float, low_handicap: float) -> Tuple[float, bool, bool]:
             soft_cap: bool = False
             hard_cap: bool = False
 

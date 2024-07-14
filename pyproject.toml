@@ -1,4 +1,10 @@
 # This project was generated with 0.3.18 using template: https://github.com/beeware/briefcase-template@v0.3.18
+
+# Disable type-checking from Mypy for Polars library
+[[tool.mypy.overrides]]
+module = "polars"
+follow_imports = "skip"
+
 [tool.briefcase]
 project_name = "Handicap Calculator"
 bundle = "com.example"

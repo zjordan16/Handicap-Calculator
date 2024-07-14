@@ -7,6 +7,7 @@ from .pages import CalculatorPage, LoginPage
 
 
 class HandicapCalculator(toga.App):
+
     def startup(self):
         self.calculator_page = CalculatorPage().Frontend().create()
         self.login_page = LoginPage()
@@ -20,6 +21,7 @@ class HandicapCalculator(toga.App):
         if self.login_page.logged_in:
             self.main_window.content = self.calculator_page
             self.main_window.show()
+
 
 def main():
     return HandicapCalculator()
