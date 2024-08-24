@@ -2,17 +2,19 @@
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
+# Built-in libraries
+from typing import Callable, Optional
 
 
 class LoginPage:
     def __init__(self):
-        self.login_callback = None
-        self.login_failed_message = None
-        self.login_button = None
-        self.password_input = None
-        self.username_input = None
-        self.content = None
-        self.logged_in = False
+        self.login_callback: Optional[Callable[[], None]] = None
+        self.login_failed_message: Optional[toga.Label] = None
+        self.login_button: Optional[toga.Button] = None
+        self.password_input: Optional[toga.PasswordInput] = None
+        self.username_input: Optional[toga.TextInput] = None
+        self.content: Optional[toga.Box] = None
+        self.logged_in: bool = False
         return
 
     def create(self, login_action_callback) -> toga.Box:
