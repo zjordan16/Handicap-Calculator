@@ -1,18 +1,20 @@
+# 3rd-party libraries
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
-from typing import Tuple, Union
-from dateutil.parser import parse
-from datetime import datetime
-import os
 import polars as pl
-
+from dateutil.parser import parse
+# Built-in libraries
+import os
+from typing import Tuple, Union
+from datetime import datetime
+# User-defined libraries
 from .login import LoginPage
 
 
 class CalculatorPage:
     def __init__(self) -> None:
-        return
+        pass
 
     # Frontend Inner Class
     class Frontend:

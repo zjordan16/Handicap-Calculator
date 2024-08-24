@@ -1,3 +1,4 @@
+# 3rd-party libraries
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
@@ -12,6 +13,7 @@ class LoginPage:
         self.username_input = None
         self.content = None
         self.logged_in = False
+        return
 
     def create(self, login_action_callback) -> toga.Box:
         # TODO: Fix the formatting to make this page look nicer.
@@ -30,7 +32,8 @@ class LoginPage:
 
         return self.content
 
-    def create_username_input(self) -> toga.Box:
+    @staticmethod
+    def create_username_input() -> toga.Box:
         username_label = toga.Label(
             "Username: ",
             style=Pack(padding=(0, 5), flex=1),
@@ -42,7 +45,8 @@ class LoginPage:
 
         return username_input_box
 
-    def create_password_input(self) -> toga.Box:
+    @staticmethod
+    def create_password_input() -> toga.Box:
         password_label = toga.Label(
             "Password: ",
             style=Pack(padding=(0, 5), flex=1),
@@ -54,7 +58,8 @@ class LoginPage:
 
         return password_input_box
 
-    def create_login_failed_message(self) -> toga.Box:
+    @staticmethod
+    def create_login_failed_message() -> toga.Label:
         return toga.Label(
             "Login Failed",
             style=Pack(padding=(0, 5), color="red", visibility="hidden", flex=1),
@@ -81,5 +86,6 @@ class LoginPage:
             self.login_failed_message.style.visibility = "visible"
             self.logged_in = False
 
-    def check_login_credentials(self, username, password) -> bool:
+    @staticmethod
+    def check_login_credentials(username, password) -> bool:
         return True if username == "user" and password == "password" else False
