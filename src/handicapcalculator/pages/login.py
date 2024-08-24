@@ -74,10 +74,7 @@ class LoginPage:
             style=Pack(padding=5, flex=1),
         )
 
-    # We have to keep the second argument 'o'. I'm not exactly sure why, but it causes errors when this function
-    # is called if we don't have the second argument present.
-    # TODO: Figure out why that happens and fix it.
-    def validate_login(self, o) -> None:
+    def validate_login(self, _widget) -> None:
         username = self.username_input.children[1].value
         password = self.password_input.children[1].value
         if self.check_login_credentials(username, password):
