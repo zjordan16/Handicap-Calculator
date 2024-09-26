@@ -26,7 +26,20 @@ test_sources = [
     "tests",
 ]
 # TODO: ADD ANY LIBRARY DEPENDENCIES HERE
-requires = ["polars>=1.1.0", "python-dateutil>=2.9.0.post0", "types-python-dateutil>=2.9.0.20240316"
+requires = [
+    "polars>=1.1.0",
+    "python-dateutil>=2.9.0.post0",
+    "types-python-dateutil>=2.9.0.20240316",
+    "cffi>=1.17.1",
+    "clr-loader>=0.2.6",
+    "pycparser==2.22",
+    "pythonnet==3.0.4",
+    "six==1.16.0",
+    "toga==0.4.7",
+    "toga-core==0.4.7",
+    "toga-winforms==0.4.7",
+    "travertino==0.3.0",
+    "wheel==0.44.0",
 ]
 test_requires = [
     "pytest",
