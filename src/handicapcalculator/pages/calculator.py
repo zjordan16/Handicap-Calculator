@@ -6,7 +6,6 @@ import polars as pl
 from dateutil.parser import parse
 # Built-in libraries
 import os
-from typing import Tuple, Union
 from datetime import datetime
 # User-defined libraries
 from .login import LoginPage
@@ -242,7 +241,7 @@ class CalculatorPage:
     # Backend Inner Class
     class Backend:
         def __init__(self) -> None:
-            self.handicap_index: Union[str, float] = ""
+            self.handicap_index: str | float = ""
             self.scorecap: str = ""
             return
 
@@ -294,7 +293,7 @@ class CalculatorPage:
                                                 )
 
             # Write new data to list in csv
-            # Collect() converts lazyframe to dataframe to read data; lazy() converts dataframe back to lazyframe
+            # Collect() converts lazy frame to dataframe to read data; lazy() converts dataframe back to lazy frame
             df: pl.lazyframe = lf.collect().sort(by="date", descending=False).lazy()
             df.sink_csv(csv_file)
 
@@ -330,7 +329,7 @@ class CalculatorPage:
 
             return
 
-        def calculate_current_handicap(self) -> Tuple[float, int]:
+        def calculate_current_handicap(self) -> tuple[float, int]:
             used_rounds, adjustment = self.calculate_rounds_to_use()
 
             if used_rounds > 0:
@@ -361,7 +360,7 @@ class CalculatorPage:
 
             return handicap, used_differentials
 
-        def calculate_rounds_to_use(self) -> Tuple[int, float]:
+        def calculate_rounds_to_use(self) -> tuple[int, float]:
             total_rounds = 0
             csv_file = self.declare_csv_directory()
 
@@ -453,7 +452,7 @@ class CalculatorPage:
 
                 # get previous date
                 date_obj = datetime.strptime(current_date, "%Y-%m-%d")
-                prev_date: Union[datetime, str] = date_obj.replace(year=date_obj.year - 1)
+                prev_date: datetime | str = date_obj.replace(year=date_obj.year - 1)
                 prev_date = prev_date.strftime("%Y-%m-%d")
             else:
                 current_date = "N/A"
@@ -462,7 +461,7 @@ class CalculatorPage:
             return prev_date
 
         @staticmethod
-        def limit_on_upward_movement(current_handicap: float, low_handicap: float) -> Tuple[float, bool, bool]:
+        def limit_on_upward_movement(current_handicap: float, low_handicap: float) -> tuple[float, bool, bool]:
             soft_cap: bool = False
             hard_cap: bool = False
 

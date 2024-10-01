@@ -3,17 +3,29 @@ import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW
 # Built-in libraries
-from typing import Callable, Optional
+from typing import Callable
+# User-defined libraries
 
 
 class LoginPage:
     def __init__(self):
-        self.login_callback: Optional[Callable[[], None]] = None
-        self.login_failed_message: Optional[toga.Label] = None
-        self.login_button: Optional[toga.Button] = None
-        self.password_input: Optional[toga.PasswordInput] = None
-        self.username_input: Optional[toga.TextInput] = None
-        self.content: Optional[toga.Box] = None
+        """
+        Type annotation: Callable[param1, param2]
+
+        Description: Used to type annotate callable methods, takes input as list of types of method parameters
+        & type of return values
+
+        Example callable method: method_name(paramType1, paramType2) -> return_type
+
+        param1: List of method parameter Types, [paramType1, paramType2]
+        param2: Type of the return value, return_Type
+        """
+        self.login_callback: Callable[[], None] | None= None
+        self.login_failed_message: toga.Label | None = None
+        self.login_button: toga.Button | None = None
+        self.password_input: toga.PasswordInput | None = None
+        self.username_input: toga.TextInput | None = None
+        self.content: toga.Box | None = None
         self.logged_in: bool = False
         return
 

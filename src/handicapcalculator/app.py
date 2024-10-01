@@ -3,8 +3,6 @@ This is a mobile/desktop application that can calculate an unofficial USGA handi
 """
 # 3rd-party libraries
 import toga
-# Built-in libraries
-from typing import Optional
 # User-defined libraries
 from .pages import *
 
@@ -12,9 +10,9 @@ from .pages import *
 class HandicapCalculator(toga.App):
     def __init__(self):
         super().__init__()
-        self.calculator_page: Optional[CalculatorPage] = None
-        self.login_page: Optional[LoginPage] = None
-        self.login_page_content: Optional[toga.Box] = None
+        self.calculator_page: CalculatorPage | None = None
+        self.login_page: LoginPage | None = None
+        self.login_page_content: toga.Box | None = None
         self.main_window: toga.MainWindow
         self.main_window_content: toga.Box
         return
