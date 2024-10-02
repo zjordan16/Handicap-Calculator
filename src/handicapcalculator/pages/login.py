@@ -1,7 +1,7 @@
 # 3rd-party libraries
 import toga
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
+from toga.style.pack import COLUMN, ROW, CENTER, BOLD, RIGHT, BOTTOM, LEFT
 # Built-in libraries
 from typing import Callable
 # User-defined libraries
@@ -30,7 +30,16 @@ class LoginPage:
         return
 
     def create(self, login_action_callback) -> toga.Box:
-        # TODO: Fix the formatting to make this page look nicer.
+        # TODO: Add USGA logo to login page above login boxes
+        """
+        Ignore this attempt it is trash and I will fix it later (I have no idea how thier Image() call works)
+        try:
+            self.image_usga = toga.Image("src\handicapcalculator\pages\WHS.png")
+        except FileNotFoundError:
+            print("File not found")
+            pass
+        view = toga.ImageView(self.image_usga)
+        """
         self.login_callback = login_action_callback
         self.content = toga.Box(style=Pack(direction=COLUMN))
 
@@ -50,10 +59,10 @@ class LoginPage:
     def create_username_input() -> toga.Box:
         username_label = toga.Label(
             "Username: ",
-            style=Pack(padding=(0, 5), flex=1),
+            style=Pack(padding=(300, 0, 5, 175), flex=1, width=100, font_weight=BOLD, font_size=10),
         )
-        username_text_input = toga.TextInput(style=Pack(flex=2))
-        username_input_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=2))
+        username_text_input = toga.TextInput(style=Pack(flex=2, font_size=10))
+        username_input_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=0, width=467, alignment=BOTTOM))
         username_input_box.add(username_label)
         username_input_box.add(username_text_input)
 
@@ -63,10 +72,10 @@ class LoginPage:
     def create_password_input() -> toga.Box:
         password_label = toga.Label(
             "Password: ",
-            style=Pack(padding=(0, 5), flex=1),
+            style=Pack(padding=(0, 0, 5, 175), flex=1, width=100, font_weight=BOLD, font_size=10),
         )
-        password_input = toga.PasswordInput(style=Pack(flex=2))
-        password_input_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=2))
+        password_input = toga.PasswordInput(style=Pack(flex=2, font_size=10))
+        password_input_box = toga.Box(style=Pack(direction=ROW, padding=5, flex=0, width=467, alignment=CENTER))
         password_input_box.add(password_label)
         password_input_box.add(password_input)
 
@@ -83,7 +92,7 @@ class LoginPage:
         return toga.Button(
             "Login",
             on_press=self.validate_login,
-            style=Pack(padding=5, flex=1),
+            style=Pack(direction=ROW, padding=(5,20,20,175), flex=2, width=300, alignment=CENTER, font_size=10, font_weight=BOLD),
         )
 
     def validate_login(self, _widget) -> None:
