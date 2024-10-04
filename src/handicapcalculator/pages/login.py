@@ -4,6 +4,7 @@ from toga.style import Pack
 from toga.style.pack import COLUMN, ROW, CENTER, BOLD, RIGHT, BOTTOM, LEFT
 # Built-in libraries
 from typing import Callable
+import os
 # User-defined libraries
 
 
@@ -31,21 +32,22 @@ class LoginPage:
 
     def create(self, login_action_callback) -> toga.Box:
         # TODO: Add USGA logo to login page above login boxes
-        """
-        Ignore this attempt it is trash and I will fix it later (I have no idea how thier Image() call works)
-        try:
-            self.image_usga = toga.Image("src\handicapcalculator\pages\WHS.png")
-        except FileNotFoundError:
-            print("File not found")
-            pass
-        view = toga.ImageView(self.image_usga)
-        """
         self.login_callback = login_action_callback
         self.content = toga.Box(style=Pack(direction=COLUMN))
 
         self.username_input = self.create_username_input()
         self.password_input = self.create_password_input()
         self.login_failed_message = self.create_login_failed_message()
+        # Ignore this attempt it is trash and I will fix it later (I have no idea how their ImageView() call works)
+        try:
+            image_dir = os.path.dirname(__file__)
+            image_path = os.path.join(image_dir, 'WHS.png')
+            self.image_usga = toga.ImageView(id='images', image=image_path)
+            self.content.add(self.image_usga)
+            # view = toga.ImageView(self.image_usga)
+        except FileNotFoundError:
+            print("File not found")
+            pass
         self.content.add(self.username_input)
         self.content.add(self.password_input)
         self.content.add(self.login_failed_message)
