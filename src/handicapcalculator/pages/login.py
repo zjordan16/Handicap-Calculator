@@ -1,7 +1,7 @@
 # 3rd-party libraries
 import toga
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW, CENTER, BOLD, BOTTOM, RIGHT
+from toga.style.pack import COLUMN, ROW, CENTER, BOLD
 # Built-in libraries
 from typing import Callable, LiteralString
 import os
