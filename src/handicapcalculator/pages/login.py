@@ -3,7 +3,7 @@ import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN, ROW, CENTER, BOLD, RIGHT, BOTTOM, LEFT
 # Built-in libraries
-from typing import Callable
+from typing import Callable, LiteralString
 import os
 # User-defined libraries
 
@@ -28,26 +28,38 @@ class LoginPage:
         self.username_input: toga.TextInput | None = None
         self.content: toga.Box | None = None
         self.logged_in: bool = False
+        self.usga_image_file_path: LiteralString | str | bytes | None = self.get_file_path('WHS.png')
+        self.usga_image: toga.ImageView | None = self.create_login_image(self.usga_image_file_path)
         return
 
+    @staticmethod
+    def get_file_path(filename: str) -> LiteralString | str | bytes | None:
+        filepath: LiteralString | str | bytes | None = None
+        try:
+            filepath = os.path.join(os.path.dirname(__file__), filename)
+        except OSError:
+            print(f"Error: {filename} not found.")
+        return filepath
+
+    def create_login_image(self, filepath: LiteralString | str | bytes | None) -> toga.ImageView | None:
+        try:
+            self.usga_image = toga.ImageView(id='images', image=self.usga_image_file_path)
+        except FileNotFoundError:
+            print(f"Error: Failed to load image")
+            return None
+        return self.usga_image
+
     def create(self, login_action_callback) -> toga.Box:
-        # TODO: Add USGA logo to login page above login boxes
         self.login_callback = login_action_callback
         self.content = toga.Box(style=Pack(direction=COLUMN))
-
         self.username_input = self.create_username_input()
         self.password_input = self.create_password_input()
         self.login_failed_message = self.create_login_failed_message()
-        # Ignore this attempt it is trash and I will fix it later (I have no idea how their ImageView() call works)
-        try:
-            image_dir = os.path.dirname(__file__)
-            image_path = os.path.join(image_dir, 'WHS.png')
-            self.image_usga = toga.ImageView(id='images', image=image_path)
-            self.content.add(self.image_usga)
-            # view = toga.ImageView(self.image_usga)
-        except FileNotFoundError:
-            print("File not found")
-            pass
+
+        # TODO: Fix image sizing and position
+        if self.usga_image is not None:
+            self.content.add(self.usga_image)
+
         self.content.add(self.username_input)
         self.content.add(self.password_input)
         self.content.add(self.login_failed_message)
