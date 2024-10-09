@@ -21,9 +21,10 @@ class CalculatorPage:
     class Frontend:
         def __init__(self, parent) -> None:
             self.parent: CalculatorPage = parent
-            self.backend = parent.backend
-            self.login_page = LoginPage()
-            self.score_history_table = None
+            self.backend: CalculatorPage.Backend = parent.backend
+            self.login_page: LoginPage = LoginPage()
+
+            self.score_history_table: toga.Table | None = None
             self.content: toga.Box = toga.Box()
             self.handicap_display: toga.Box = toga.Box()
             self.invalid_inputs_message: toga.Label = toga.Label("")
@@ -245,6 +246,7 @@ class CalculatorPage:
     class Backend:
         def __init__(self, parent) -> None:
             self.parent: CalculatorPage = parent
+
             self.handicap_index: str | float = ""
             self.scorecap: str = ""
             return

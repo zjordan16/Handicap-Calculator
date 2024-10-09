@@ -8,9 +8,14 @@ from .pages import *
 
 class HandicapCalculator(toga.App):
     def __init__(self):
+        # Initialize toga.App
         super().__init__()
+
+        # Initialize app pages
         self.calculator_page: CalculatorPage | None = None
         self.login_page: LoginPage | None = None
+
+        # Initialize app window and content
         self.login_page_content: toga.Box | None = None
         self.main_window: toga.MainWindow
         self.main_window_content: toga.Box
