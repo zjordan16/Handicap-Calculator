@@ -1,25 +1,28 @@
-# 3rd-party libraries
-import toga
-from toga.style import Pack
-from toga.style.pack import COLUMN, ROW
-import polars as pl
-from dateutil.parser import parse
-# Built-in libraries
 import os
 from datetime import datetime
-# User-defined libraries
+
+import polars as pl
+import toga
+from dateutil.parser import parse
+from toga.style import Pack
+from toga.style.pack import COLUMN, ROW
+
 from .login import LoginPage
 
 
 class CalculatorPage:
     def __init__(self) -> None:
-        pass
+        self.backend = self.Backend(self)
+        self.backend.parent = self
+        self.frontend = self.Frontend(self)
+        self.frontend.parent = self
 
     # Frontend Inner Class
     class Frontend:
-        def __init__(self) -> None:
+        def __init__(self, parent) -> None:
+            self.parent: CalculatorPage = parent
+            self.backend = parent.backend
             self.login_page = LoginPage()
-            self.backend = CalculatorPage().Backend()
             self.score_history_table = None
             self.content: toga.Box = toga.Box()
             self.handicap_display: toga.Box = toga.Box()
@@ -240,7 +243,8 @@ class CalculatorPage:
 
     # Backend Inner Class
     class Backend:
-        def __init__(self) -> None:
+        def __init__(self, parent) -> None:
+            self.parent: CalculatorPage = parent
             self.handicap_index: str | float = ""
             self.scorecap: str = ""
             return

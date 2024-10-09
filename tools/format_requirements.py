@@ -5,8 +5,9 @@ Input: requirements.txt file
 Output: formatted_requirements.txt file
 """
 
-import re
 import os
+import re
+
 import chardet
 
 

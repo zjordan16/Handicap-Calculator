@@ -1,9 +1,8 @@
 """
 This is a mobile/desktop application that can calculate an unofficial USGA handicap.
 """
-# 3rd-party libraries
 import toga
-# User-defined libraries
+
 from .pages import *
 
 
@@ -18,7 +17,7 @@ class HandicapCalculator(toga.App):
         return
 
     def startup(self):
-        self.calculator_page = CalculatorPage().Frontend().create()
+        self.calculator_page = CalculatorPage().frontend.create()
         self.login_page = LoginPage()
         self.login_page_content = self.login_page.create(self.check_login)
         self.main_window = toga.MainWindow(title="Handicap Calculator")

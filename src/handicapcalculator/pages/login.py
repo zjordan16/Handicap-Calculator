@@ -1,10 +1,9 @@
-# 3rd-party libraries
+import os
+from typing import Callable, LiteralString
+
 import toga
 from toga.style import Pack
-from toga.style.pack import COLUMN, ROW, CENTER, BOLD
-# Built-in libraries
-from typing import Callable, LiteralString
-import os
+from toga.style.pack import BOLD, CENTER, COLUMN, ROW
 
 
 class LoginPage:
