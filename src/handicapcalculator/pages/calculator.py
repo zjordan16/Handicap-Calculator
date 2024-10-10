@@ -19,13 +19,18 @@ class CalculatorPage:
 
     # Frontend Inner Class
     class Frontend:
+        # Declare class variables
+        content: toga.Box = toga.Box()
+        save_round_button: toga.Button = toga.Button()
+
         def __init__(self, parent) -> None:
+            # Declare instance variables
+            # TODO: try these three as class variables instead
             self.parent: CalculatorPage = parent
             self.backend: CalculatorPage.Backend = parent.backend
             self.login_page: LoginPage = LoginPage()
 
             self.score_history_table: toga.Table | None = None
-            self.content: toga.Box = toga.Box()
             self.handicap_display: toga.Box = toga.Box()
             self.invalid_inputs_message: toga.Label = toga.Label("")
             self.course_rating_input: toga.Box = toga.Box()
@@ -34,10 +39,11 @@ class CalculatorPage:
             self.date_input: toga.Box = toga.Box()
             self.course_name_input: toga.Box = toga.Box()
             self.scorecap_display: toga.Box = toga.Box()
+
             return
 
         def create(self) -> toga.Box:
-            self.content = toga.Box(style=Pack(direction=COLUMN))
+            CalculatorPage.content = toga.Box(style=Pack(direction=COLUMN))
 
             # Create Inputs
             self.course_name_input = self.create_course_name_input()
@@ -48,34 +54,34 @@ class CalculatorPage:
             self.invalid_inputs_message = self.create_invalid_inputs_message()
 
             # Create button to save inputs
-            save_round_button: toga.Button = toga.Button("Save Round Information",
+            CalculatorPage.save_round_button = toga.Button("Save Round Information",
                                                          on_press=self.save_score,  # type: ignore
                                                          style=Pack(padding=5),
                                                          )
 
             # Add inputs to main box
-            self.content.add(self.course_name_input)
-            self.content.add(self.date_input)
-            self.content.add(self.score_input)
-            self.content.add(self.course_rating_input)
-            self.content.add(self.course_slope_input)
-            self.content.add(self.invalid_inputs_message)
-            self.content.add(save_round_button)
+            CalculatorPage.content.add(self.course_name_input)
+            CalculatorPage.content.add(self.date_input)
+            CalculatorPage.content.add(self.score_input)
+            CalculatorPage.content.add(self.course_rating_input)
+            CalculatorPage.content.add(self.course_slope_input)
+            CalculatorPage.content.add(self.invalid_inputs_message)
+            CalculatorPage.content.add(CalculatorPage.save_round_button)
 
             # Create table to show saved rounds
             self.score_history_table = self.create_score_history_table()
-            self.content.add(self.score_history_table)
+            CalculatorPage.content.add(self.score_history_table)
             self.display_table()
 
             # Create display for handicap
             self.handicap_display = self.create_handicap_display()
-            self.content.add(self.handicap_display)
+            CalculatorPage.content.add(self.handicap_display)
 
             # Create display for soft and hard cap
             self.scorecap_display = self.create_scorecap_display()
-            self.content.add(self.scorecap_display)
+            CalculatorPage.content.add(self.scorecap_display)
 
-            return self.content
+            return CalculatorPage.content
 
         @staticmethod
         def create_course_name_input() -> toga.Box:
@@ -244,9 +250,9 @@ class CalculatorPage:
 
     # Backend Inner Class
     class Backend:
+        # TODO: Fix class and instance variables for this inner class
         def __init__(self, parent) -> None:
             self.parent: CalculatorPage = parent
-
             self.handicap_index: str | float = ""
             self.scorecap: str = ""
             return
